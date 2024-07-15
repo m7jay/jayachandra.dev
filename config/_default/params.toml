@@ -80,7 +80,7 @@ highlightCurrentMenuArea = true
   showTermCount = false
 
 [firebase]
-  apiKey = "AIzaSyDK2caNbkzDW69wCZKjNcBuJqqFLmjLcR8
+  apiKey = "AIzaSyDK2caNbkzDW69wCZKjNcBuJqqFLmjLcR8"
   authDomain = "jayachandra-dev.firebaseapp.com"
   projectId = "jayachandra-dev"
   storageBucket = "jayachandra-dev.appspot.com"

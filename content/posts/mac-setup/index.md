@@ -63,25 +63,25 @@ Increase the font size in the terminal to 20 :)
 - Auto-suggestions
 
 ```bash
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 ```
 
 - Syntax Highlighting
 
 ```bash
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
 - Add the plugins in ~/.zshrc
 
-```
+```bash
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting web-search)
 ```
 
 - Load the changes
 
 ```bash
-    source ~/.zshrc
+source ~/.zshrc
 ```
 
 Done!

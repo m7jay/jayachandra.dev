@@ -80,13 +80,13 @@ highlightCurrentMenuArea = true
   showTermCount = false
 
 [firebase]
-  # apiKey = "XXXXXX"
-  # authDomain = "XXXXXX"
-  # projectId = "XXXXXX"
-  # storageBucket = "XXXXXX"
-  # messagingSenderId = "XXXXXX"
-  # appId = "XXXXXX"
-  # measurementId = "XXXXXX"
+  apiKey = "AIzaSyDK2caNbkzDW69wCZKjNcBuJqqFLmjLcR8
+  authDomain = "jayachandra-dev.firebaseapp.com"
+  projectId = "jayachandra-dev"
+  storageBucket = "jayachandra-dev.appspot.com"
+  messagingSenderId = "395825578297"
+  appId = "1:395825578297:web:184f11676f8e010714a8e8"
+  measurementId = "G-6SZ7YLQFC8"
 
 [fathomAnalytics]
   # site = "ABC12345"

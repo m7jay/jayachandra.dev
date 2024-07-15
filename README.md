@@ -2,5 +2,5 @@
 
 # run locally
 ```
-hugo -D -E -F
+hugo -D -E -F server
 ```

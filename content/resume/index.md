@@ -1,41 +1,47 @@
 ---
-title: "Résumé"
+title: "Hi there!"
+
 date: 2026-07-10
 
-showDate : false
+showDate: false
 showAuthor: false
-showDateOnlyInArticle : false
-showDateUpdated : false
-showHeadingAnchors : false
-showPagination : false
-showReadingTime : false
-showTableOfContents : false
-showTaxonomies : false 
-showWordCount : false
-showSummary : false
-sharingLinks : false
+showDateOnlyInArticle: false
+showDateUpdated: false
+showHeadingAnchors: false
+showPagination: false
+showReadingTime: false
+showTableOfContents: false
+showTaxonomies: false
+showWordCount: false
+showSummary: false
+sharingLinks: false
 showEdit: false
 showViews: false
 showLikes: false
 layoutBackgroundHeaderSpace: false
 layout: "simple"
-
 ---
 
-Staff Software Engineer with 7+ years building and scaling distributed backend systems, payment workflows, and event-driven platforms. I focus on high-throughput APIs, resilient integrations, operational excellence, and technical leadership for critical financial workflows.
+<div class="resume-download"><a href="/resume/Jayachandra_M.pdf" download>Download Resume <span aria-hidden="true">↓</span></a></div>
 
-<div class="resume-contact"><a href="mailto:m7jayachandra@gmail.com">m7jayachandra@gmail.com</a> · Bengaluru, India · <a href="https://linkedin.com/in/m7jay">LinkedIn</a> · <a href="https://github.com/m7jay">GitHub</a></div>
+## About me
 
-## Core strengths
+Hi, I’m Jayachandra, an experienced backend-focused Staff Software Engineer.
 
-**System design** · Distributed workflows · Payment orchestration · Partner integrations · Event-driven systems · Webhooks · Reliability engineering · Observability · Technical leadership
+Most recently at Jodo, I led the integrations team and worked on business-critical payment and invoice-processing workflows. I architected an invoice orchestration platform that processed **~50K–60K invoices per day in a ~4 hour window** and supported payment volumes exceeding **~₹100Cr daily**. It coordinated hundreds of partner integrations, accommodated high-latency external dependencies, and maintained strict correctness guarantees—because a missed or incorrect invoice could have direct financial consequences.
+
+My work also includes event-driven webhook platforms, Kafka-based asynchronous processing, and secure partner-integration frameworks for real-time notifications and data exchange. Alongside hands-on technical work, I led architecture reviews, mentored engineers, supported backend hiring, and raised engineering standards across the team.
+
+Earlier at Tally Solutions, I contributed to the TallyPrime 1.0 release and to developer-productivity work, including reducing build times for a large monorepo from about 45 minutes to 15 minutes.
+
+After my most recent role, I took a short planned break before my next opportunity. I’m now looking for backend and platform-engineering roles where I can work on distributed systems, scalability, reliability, and high-impact platforms.
 
 ## Experience
 
 ### Jodo — Staff Software Engineer
 
 **Oct 2024 – Jan 2026 · Bengaluru, India**<br>
-*Python, Django, MySQL, Redis, Kafka, AWS, Docker, Terraform*
+_Python, Django, MySQL, Redis, Kafka, AWS, Docker, Terraform_
 
 - Architected an invoice orchestration platform that retrieves real-time fee details from ~400 partner systems and presents invoices for automated debit workflows.
 - Designed for **50K–60K invoices/day** and payment volumes above **₹100Cr/day**, while handling upstream response times from sub-second to roughly 60 seconds.
@@ -47,7 +53,7 @@ Staff Software Engineer with 7+ years building and scaling distributed backend s
 ### Jodo — Senior Software Engineer
 
 **Jul 2021 – Sep 2024 · Bengaluru, India**<br>
-*Python, Django, MySQL, Redis, Celery*
+_Python, Django, MySQL, Redis, Celery_
 
 - Owned REST APIs and partner integrations for payment and fee-collection workflows; push APIs consistently achieved approximately **500ms p99** latency.
 - Reduced a critical metadata service latency by about **75%**, from roughly two seconds to 500ms.
@@ -57,7 +63,7 @@ Staff Software Engineer with 7+ years building and scaling distributed backend s
 ### Tally Solutions — Software Development Engineer II
 
 **Jun 2020 – Jul 2021 · Bengaluru, India**<br>
-*C/C++*
+_C/C++_
 
 - Built installer and application-management systems for TallyPrime Release 1.0, supporting deployment and version management across enterprise products.
 - Developed native Windows features using low-level system APIs, custom UI rendering, and environment/configuration management.
@@ -65,20 +71,20 @@ Staff Software Engineer with 7+ years building and scaling distributed backend s
 ### Tally Solutions — Software Development Engineer I
 
 **Jan 2019 – Jun 2020 · Bengaluru, India**<br>
-*C/C++, Python, Shell*
+_C/C++, Python, Shell_
 
 - Improved Jenkins build and deployment pipelines for a large monorepo, reducing build time from about **45 minutes to 15 minutes**.
 
 ### Tally Solutions — Software Engineer Trainee
 
 **Jul 2018 – Dec 2018 · Bengaluru, India**<br>
-*Python, TDL*
+_Python, TDL_
 
 - Developed SME financial reporting solutions and contributed to feature validation, defect discovery, and unit testing.
 
 ## Technology
 
-Python · Django · Kafka · Redis · MySQL · AWS · Terraform · Docker · Celery · Prometheus · Grafana · OpenTelemetry · Sentry · C/C++ · Go
+Python · Django · MySQL · Redis · Kafka · AWS · Terraform · Docker · Celery · Prometheus · Grafana · OpenTelemetry · Sentry · C/C++ · Go
 
 ## Education
 

@@ -11,7 +11,7 @@
 # ordered by weight from lowest to highest.
 
 [[main]]
-  name = "Writing"
+  name = "Posts"
   pageRef = "posts"
   weight = 10
 
@@ -19,12 +19,6 @@
   name = "Resume"
   pageRef = "resume"
   weight = 20
-
-[[main]]
-  name = "Stack"
-  url = "/#technical-focus"
-  weight = 30
-
 
 # -- Footer Menu --
 # The footer menu is displayed at the bottom of the page, just before

@@ -11,18 +11,18 @@
 # ordered by weight from lowest to highest.
 
 [[main]]
-  name = "Blog"
+  name = "Writing"
   pageRef = "posts"
   weight = 10
 
 [[main]]
-  name = "Tags"
-  pageRef = "tags"
+  name = "Resume"
+  pageRef = "resume"
   weight = 20
 
 [[main]]
-  name = "Resume"
-  pageRef = "resume"
+  name = "Stack"
+  url = "/#technical-focus"
   weight = 30
 
 

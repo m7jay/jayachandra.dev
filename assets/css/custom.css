@@ -127,3 +127,12 @@
 td {
     vertical-align: middle !important;
 }
+
+.portfolio-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin: 1.75rem 0 2.5rem; }
+.portfolio-actions a { border: 1px solid rgb(var(--color-primary-500)); border-radius: .5rem; padding: .55rem 1rem; text-decoration: none; font-weight: 700; }
+.portfolio-actions a:first-child { background: rgb(var(--color-primary-500)); color: white; }
+.focus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1rem 0 2rem; text-align: left; }
+.focus-grid > div { border: 1px solid rgba(115, 115, 115, .35); border-radius: .75rem; padding: 1rem; background: rgba(115, 115, 115, .08); }
+.focus-grid strong, .focus-grid span { display: block; }
+.focus-grid span { font-size: .9rem; line-height: 1.45; margin-top: .5rem; }
+.resume-contact { margin: 1rem 0 2rem; font-size: .95rem; }

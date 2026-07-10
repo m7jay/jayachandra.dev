@@ -127,3 +127,24 @@
 td {
     vertical-align: middle !important;
 }
+
+.portfolio-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; margin: 1.75rem 0 2.5rem; }
+.portfolio-actions a { border: 1px solid rgb(var(--color-primary-500)); border-radius: .5rem; padding: .55rem 1rem; text-decoration: none; font-weight: 700; }
+.portfolio-actions a:first-child { background: rgb(var(--color-primary-500)); color: white; }
+.focus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1rem 0 2rem; text-align: left; }
+.focus-grid > div { border: 1px solid rgba(115, 115, 115, .35); border-radius: .75rem; padding: 1rem; background: rgba(115, 115, 115, .08); }
+.focus-grid strong, .focus-grid span { display: block; }
+.focus-grid span { font-size: .9rem; line-height: 1.45; margin-top: .5rem; }
+.resume-contact { margin: .25rem 0 2rem; font-size: .95rem; white-space: nowrap; }
+.resume-download { margin: -4.15rem 0 2.5rem; position: relative; text-align: right; z-index: 1; }
+.resume-download a { background: rgb(var(--color-primary-500)); border: 1px solid rgb(var(--color-primary-500)); border-radius: .625rem; box-shadow: 0 6px 16px rgba(0, 0, 0, .12); color: white; display: inline-block; font-weight: 700; padding: .65rem 1rem; text-decoration: none; transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.resume-download a:hover { background: rgb(var(--color-primary-600)); box-shadow: 0 9px 22px rgba(0, 0, 0, .18); color: white; transform: translateY(-1px); }
+.site-contact-footer { border-top: 1px solid rgba(115, 115, 115, .3); margin: 1.5rem 0 0; padding-top: 1.5rem; text-align: center; }
+#top-scroller { right: -3.5rem !important; }
+#top-scroller a { top: calc(100vh - 4.5rem) !important; }
+@media screen and (max-width: 700px) {
+    .resume-contact { white-space: normal; }
+    .resume-download { margin: 0 0 2rem; text-align: left; }
+    #top-scroller { right: 0 !important; }
+    #top-scroller a { top: calc(100vh - 5.5rem) !important; }
+}

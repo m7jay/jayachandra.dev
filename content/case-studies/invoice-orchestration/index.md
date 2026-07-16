@@ -115,19 +115,19 @@ A 10pm cron triggers report generation, reading from the same outbox table popul
 
 ## Integration Service
 
-- Integration Service acts like an orchestrator, handling fetching data from external partner systems, figuring out if an updated is needed, changes to be done and making HTTP requests to internal services to update the new state and finally presenting the invoice for debit.
+- Integration Service acts like an orchestrator, handling fetching data from external partner systems, figuring out if an update is needed, changes to be done and making HTTP requests to internal services to update the new state and finally presenting the invoice for debit.
 
-- Integrations workers are running 24/7, even though we only use then for few hours every day. We didn't need to do worker auto scaling, when needed for few days a year, we could monitor and increase the resource on specific days as per the load.
+- Integrations workers are running 24/7, even though we only use them for few hours every day. We didn't need to do worker auto scaling, when needed for few days a year, we could monitor and increase the resource on specific days as per the load.
 
 - Each msg can take upto ~5s to be processed successfully and multiple calls over HTTP are done (external and internal calls) in processing a single msg.
 
-- For each partner, we could have a configurable timeouts in integration service.
+- For each partner, we have configurable timeouts in integration service.
 
-- For each partner we could have configurable number of retries in case of failures while processing the invoice.
+- For each partner we have configurable number of retries in case of failures while processing the invoice.
 
 - At integration service, we have a default way of processing of invoices, per partners we could have custom implementations using the template method pattern.
 
-- Duplicate invoice processing in avoided by having a composite key in the invoice outbox table before ingestion and invoice present call is idempotent and would raise error if already presented.
+- Duplicate invoice processing is avoided by having a composite key in the invoice outbox table before ingestion and invoice present call is idempotent and would raise error if already presented.
 
 - Duplicate customer notification is handled by notification service.
 

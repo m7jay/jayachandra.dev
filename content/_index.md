@@ -10,10 +10,11 @@ I’m a backend-focused Staff Software Engineer with 7+ years of experience buil
   <a href="/case-studies/">Explore case studies</a>
 </div>
 
-## Scope of influence
+---
+
+<div><span>Previous Work - Lead Integrations team @Jodo, with two direct reportees.</span></div>
 
 <div class="impact-grid">
-  <div><strong>Previous Work</strong><span>Lead Integrations team @Jodo, with two direct reports.</span></div>
   <div><strong>₹100Cr+/day</strong><span>Payment volume supported by invoice presentation orchestration.</span></div>
   <div><strong>50K–60K/day</strong><span>Invoices processed in a ~4-hour operating window.</span></div>
   <div><strong>~400 partners</strong><span>External systems with variable latency and reliability.</span></div>

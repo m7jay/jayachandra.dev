@@ -3,6 +3,7 @@ title: "Faster feedback loops in a monorepo"
 date: 2026-04-14
 summary: "Why build speed is a systems problem—and how a 45-minute pipeline can become a 15-minute one."
 tags: ["developer-experience", "ci-cd", "engineering-productivity"]
+draft: true
 ---
 
 Build time is an engineering throughput problem. When every change waits for a long pipeline, developers batch work, context-switch more often, and receive feedback after the code is no longer fresh.

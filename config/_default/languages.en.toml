@@ -2,7 +2,7 @@ languageCode = "en"
 languageName = "English"
 weight = 1
 
-title = "Jayachandra M"
+title = "Home"
 
 [params]
   displayName = "EN"
@@ -15,9 +15,9 @@ title = "Jayachandra M"
 
 [author]
   name = "Jayachandra M"
-  image = "profile.jpg"
-  headline = "Staff Software Engineer"
-  bio = "I build reliable backend platforms for high-volume financial workflows."
+  # image = "profile.jpg"
+  headline = ""
+  bio = ""
   links = [
      { email = "mailto:m7jayachandra@gmail.com" },
   #   { link = "https://link-to-some-website.com/" },

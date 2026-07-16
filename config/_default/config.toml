@@ -4,6 +4,7 @@
 
 theme = "blowfish"
 # baseURL = "https://your_domain.com/"
+baseURL = "https://jayachandra.dev/"
 defaultContentLanguage = "en"
 
 enableRobotsTXT = true

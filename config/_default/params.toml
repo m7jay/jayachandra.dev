@@ -30,7 +30,7 @@ highlightCurrentMenuArea = true
 
 [homepage]
   layout = "background" # valid options: page, profile, hero, card, background, custom
-  showRecent = true
+  showRecent = false
   showRecentItems = 4
   showMoreLink = true
   showMoreLinkDest = "/posts"
@@ -40,8 +40,8 @@ highlightCurrentMenuArea = true
 
 [article]
   showDate = true
-  showViews = true
-  showLikes = true
+  showViews = false
+  showLikes = false
   showDateUpdated = true
   showAuthor = false
   showHero = false

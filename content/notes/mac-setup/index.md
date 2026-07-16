@@ -3,6 +3,7 @@ title: "Setup Macbook Pro"
 date: 2024-07-16
 summary: "Quick setup for Macbook Pro M3 for backend dev"
 tags: ["mac", "m3", "setup"]
+draft: true
 ---
 
 ### 1. Install homebrew

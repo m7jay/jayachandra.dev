@@ -16,7 +16,7 @@ title = "Jayachandra M"
 [author]
   name = "Jayachandra M"
   image = "profile.jpg"
-  headline = "Staff Software Engineer"
+  headline = ""
   bio = "I build reliable backend platforms for high-volume financial workflows."
   links = [
      { email = "mailto:m7jayachandra@gmail.com" },

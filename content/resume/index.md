@@ -43,7 +43,7 @@ After my most recent role, I took a short planned break before my next opportuni
 **Oct 2024 – Jan 2026 · Bengaluru, India**<br>
 _Python, Django, MySQL, Redis, Kafka, AWS, Docker, Terraform_
 
-- Architected an invoice orchestration platform that retrieves real-time fee details from ~400 partner systems and presents invoices for automated debit workflows.
+- Architected an [invoice orchestration platform](/case-studies/invoice-orchestration/) that retrieves real-time fee details from ~400 partner systems and presents invoices for automated debit workflows.
 - Designed for **50K–60K invoices/day** and payment volumes above **₹100Cr/day**, while handling upstream response times from sub-second to roughly 60 seconds.
 - Built asynchronous Kafka and Redis pipelines with persistent state, recovery paths, and correctness controls across fetch, synchronization, and presentation stages.
 - Designed an event-driven webhook platform with queue isolation, prioritisation, retries, exponential backoff, and durable audit trails.

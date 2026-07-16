@@ -135,6 +135,11 @@ td {
 .focus-grid > div { border: 1px solid rgba(115, 115, 115, .35); border-radius: .75rem; padding: 1rem; background: rgba(115, 115, 115, .08); }
 .focus-grid strong, .focus-grid span { display: block; }
 .focus-grid span { font-size: .9rem; line-height: 1.45; margin-top: .5rem; }
+.impact-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); margin: 1rem 0 1.5rem; text-align: left; }
+.impact-grid > div { border-left: 3px solid rgb(var(--color-primary-500)); padding: .25rem 0 .25rem .85rem; }
+.impact-grid strong, .impact-grid span { display: block; }
+.impact-grid strong { font-size: 1.25rem; }
+.impact-grid span { font-size: .87rem; line-height: 1.4; margin-top: .25rem; }
 .resume-contact { margin: .25rem 0 2rem; font-size: .95rem; white-space: nowrap; }
 .resume-download { margin: -4.15rem 0 2.5rem; position: relative; text-align: right; z-index: 1; }
 .resume-download a { background: rgb(var(--color-primary-500)); border: 1px solid rgb(var(--color-primary-500)); border-radius: .625rem; box-shadow: 0 6px 16px rgba(0, 0, 0, .12); color: white; display: inline-block; font-weight: 700; padding: .65rem 1rem; text-decoration: none; transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease; }

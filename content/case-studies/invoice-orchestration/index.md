@@ -40,7 +40,7 @@ Instead, we fetch the latest details directly from each partner system, reconcil
 
 - **Volume is spiky, not steady.** Daily invoice counts range from ~1,000 to ~60,000, depending on the day of month and partner systems.
 - **Partner heterogeneity.** Each partner runs its own tech stack, with its own release cycles, a partner-side fix or change can take weeks to months to ship. Partner team competence varies widely - some are well-staffed engineering teams, others have outsourced, slow-to-respond vendors.
-- **Latency variance per partner is extreme** — anywhere from a few milliseconds to 60+ seconds per request, and this is _unpredictable_ in advance.
+- **Latency variance per partner is extreme** — anywhere from a few milliseconds to 15 seconds per request, and this is _unpredictable_ in advance.
 - **Shared infrastructure contention.** This pipeline doesn't run in isolation. At the same time, the same core services are handling inbound webhooks from partners, outbound webhook dispatch to partners, high-volume push API traffic, and internal bulk uploads/report downloads. A spike in any of these can degrade the pull-and-present flow's throughput, and vice versa.
 - **No safe prefetch/cache.** We can't fetch once and cache for the day - that reintroduces the staleness problem we're solving for. Every invoice needs a fresh fetch within the window.
 - **Dual reporting requirement.** After processing, two different reports are generated: an internal report for ops/follow-up, and an external report for subscribed clients.
@@ -142,21 +142,30 @@ The 2pm–6pm window is fixed, so worker count is a direct function of per-invoi
 **Assumptions:**
 
 - Processing window: 4 hours
-- Worst-case per-invoice processing time: ~5s
+- On avg per-invoice processing time: ~5s
+- ~5% of invoices hit the 15s worst case
 
-**Per-worker throughput:**
-
-$$
-\text{Messages per worker} = \frac{4 \times 60 \times 60}{5} = \frac{14{,}400}{5} \approx 2{,}900 \text{ msgs}
-$$
-
-**Workers needed for peak volume (~50k invoices):**
+**Total processing time required, for 50,000 invoices:**
 
 $$
-\text{Workers required} = \frac{50{,}000}{2{,}900} \approx 17.2 \Rightarrow \textbf{18 workers}
+\text{Slow invoices} = 5\\% \times 50{,}000 = 2{,}500 \text{ invoices} \times 15\text{s} = 37{,}500 \text{ worker-seconds}
 $$
 
-So at the observed worst-case per-invoice latency, roughly 18 concurrent workers are needed to clear a 50k-invoice day within the 4-hour window.
+$$
+\text{Average invoices} = 95\\% \times 50{,}000 = 47{,}500 \text{ invoices} \times 5\text{s} = 237{,}500 \text{ worker-seconds}
+$$
+
+$$
+\text{Total work} = 37{,}500 + 237{,}500 = 275{,}000 \text{ worker-seconds}
+$$
+
+**Workers required within the 4-hour (14,400s) window:**
+
+$$
+\text{Workers required} = \frac{275{,}000}{14{,}400} \approx 19.1 \Rightarrow \textbf{20 workers}
+$$
+
+So roughly 20 concurrent workers are needed to clear a 50k-invoice day within the 4-hour window.
 
 | Daily invoice volume | Workers needed (at 2,900 msgs/worker) |
 | -------------------- | ------------------------------------- |
@@ -165,6 +174,17 @@ So at the observed worst-case per-invoice latency, roughly 18 concurrent workers
 | 25,000               | 9                                     |
 | 50,000               | 18                                    |
 | 60,000               | 21                                    |
+
+**Sensitivity to the slow-invoice share:**
+
+| Share of invoices at 15s | Workers required |
+| ------------------------ | ---------------- |
+| 0% (all at 5s)           | 18               |
+| 5%                       | 20               |
+| 10%                      | 21               |
+| 20%                      | 25               |
+
+**Caveat:** this model assumes work is evenly distributed across workers — any worker can pick up any invoice, with no clustering of slow invoices onto specific workers. In practice, provisioning a small buffer above the minimum (15-20%) is a reasonable hedge against queueing delay and uneven distribution near the window's deadline.
 
 ---
 

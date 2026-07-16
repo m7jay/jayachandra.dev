@@ -23,7 +23,7 @@ Debiting a stale amount has real financial consequences. A wrong debit can resul
 
 **Why integrations, not just manual updates?**
 
-The alternative, partners bulk-upload updated dues once a day, creates a single point of failure and forces the partner's system into a freeze window until the upload is processed.
+The alternative, partners bulk-uploads dues once a day, creates a single point of failure and forces the partner's system into a freeze window until the upload is processed.
 That doesn't scale across partners with different operational rhythms, and it puts an availability constraint on someone else's system, which we don't control.
 
 Instead, we fetch the latest details directly from each partner system, reconcile the delta against what's currently recorded, and adjust before presenting the invoice for debit.

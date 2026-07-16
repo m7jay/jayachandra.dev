@@ -182,6 +182,6 @@ Not every invoice finishes cleanly within the 4-hour window.
 Two failure modes are handled operationally rather than automatically:
 
 - **Messages stuck in an intermediate state** - an invoice that started processing but didn't reach a terminal state before the window closed. These require manual reprocessing.
-- **Final state reached but not presented** - the invoice was validated and updated, but the present-for-debit step didn't complete. These are also handled operationally rather than auto-retried.
+- **Final state reached but not presented** - the invoice was validated and updated, but the present-for-debit step didn't complete due to a validation failure. These are also handled operationally rather than auto-retried.
 
 Full automated recovery for every edge case at this volume wasn't worth the complexity, given how rarely these states occur in practice. Operational visibility makes manual intervention fast enough that it wasn't needed to be automated - so far.

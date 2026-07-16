@@ -1,5 +1,5 @@
 ---
-title: "Case Studies"
+title: "Blog"
 description: "Systems design, platform engineering, and reliability work behind critical financial workflows."
 ---
 

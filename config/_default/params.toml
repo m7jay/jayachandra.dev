@@ -12,7 +12,7 @@ autoSwitchAppearance = true
 enableSearch = true
 enableCodeCopy = true
 
-mainSections = ["resume"]
+mainSections = ["blog"]
 
 disableImageOptimization = true
 
@@ -26,14 +26,14 @@ highlightCurrentMenuArea = true
   showCopyright = false
   showThemeAttribution = false
   showAppearanceSwitcher = true
-  showScrollToTop = true
+  showScrollToTop = false
 
 [homepage]
-  layout = "hero" # valid options: page, profile, hero, card, background, custom
+  layout = "profile" # valid options: page, profile, hero, card, background, custom
   showRecent = true
   showRecentItems = 4
   showMoreLink = true
-  showMoreLinkDest = "/case-studies"
+  showMoreLinkDest = "/blog"
   cardView = true
   cardViewScreenWidth = false
   layoutBackgroundBlur = true # only used when layout equals background

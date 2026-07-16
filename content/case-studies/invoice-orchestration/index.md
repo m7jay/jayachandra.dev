@@ -1,5 +1,5 @@
 ---
-title: "Pull & Present: HLD"
+title: "Invoice Presentation Orchestration"
 date: 2026-07-12
 summary: "How an asynchronous, stateful workflow supported 50K–60K invoices per day across roughly 400 partner systems."
 tags: ["case-study", "distributed-systems", "payments", "reliability"]

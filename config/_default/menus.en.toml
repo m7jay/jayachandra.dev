@@ -21,6 +21,10 @@
   pageRef = "resume"
   weight = 20
 
+[[main]]
+  name = "Contact"
+  pageRef = "contact"
+  weight = 30
 
 
 # -- Footer Menu --
@@ -32,8 +36,3 @@
 #   name = "Tags"
 #   pageRef = "tags"
 #   weight = 10
-
-# [[footer]]
-#   name = "Categories"
-#   pageRef = "categories"
-#   weight = 20

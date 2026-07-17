@@ -26,7 +26,7 @@ highlightCurrentMenuArea = true
   showCopyright = false
   showThemeAttribution = false
   showAppearanceSwitcher = true
-  showScrollToTop = false
+  showScrollToTop = true
 
 [homepage]
   layout = "background" # valid options: page, profile, hero, card, background, custom
@@ -40,11 +40,11 @@ highlightCurrentMenuArea = true
 
 [article]
   showDate = true
-  showViews = true
-  showLikes = true
-  showDateUpdated = true
+  showViews = false
+  showLikes = false
+  showDateUpdated = false
   showAuthor = false
-  showHero = true
+  showHero = false
   heroStyle = "basic" # valid options: basic, big, background
   showBreadcrumbs = true
   showDraftLabel = false

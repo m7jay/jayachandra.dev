@@ -36,7 +36,7 @@ Earlier at Tally Solutions, I contributed to the TallyPrime 1.0 release and to d
 
 After my most recent role, I took a short planned break before my next opportunity. I’m now looking for backend and platform-engineering roles where I can work on distributed systems, scalability, reliability, and high-impact platforms.
 
-### [View recommendations](/recommendations)
+### [View recommendations](/recommendations/)
 
 ---
 

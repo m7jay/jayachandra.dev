@@ -36,6 +36,10 @@ Earlier at Tally Solutions, I contributed to the TallyPrime 1.0 release and to d
 
 After my most recent role, I took a short planned break before my next opportunity. I’m now looking for backend and platform-engineering roles where I can work on distributed systems, scalability, reliability, and high-impact platforms.
 
+### [View recommendations](/recommendations)
+
+---
+
 ## Experience
 
 ### Jodo — Staff Software Engineer
@@ -82,9 +86,13 @@ _Python, TDL_
 
 - Developed SME financial reporting solutions and contributed to feature validation, defect discovery, and unit testing.
 
+---
+
 ## Technology
 
 Python · Django · MySQL · Redis · Kafka · AWS · Terraform · Docker · Celery · Prometheus · Grafana · OpenTelemetry · Sentry · C/C++ · Go
+
+---
 
 ## Education
 

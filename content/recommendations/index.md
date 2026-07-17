@@ -18,7 +18,7 @@ layout: "simple"
 >
 > He would be a good fit for teams that value integration depth, structured execution, and engineers who take responsibility for what they build.
 >
-> [Ritesh Shrivastav, Direct of Engineering @ Jodo](https://www.linkedin.com/in/codingdash/)
+> [Ritesh Shrivastav, Director of Engineering @ Jodo](https://www.linkedin.com/in/codingdash/)
 
 ---
 
@@ -41,4 +41,4 @@ layout: "simple"
 >
 > He is a strong team player who can be trusted with critical systems and high-impact work. Any organization would be fortunate to have Jayachandra on their engineering team, and I highly recommend him for roles that demand both technical excellence and reliability.
 >
-> [Md Asif Aftab, Manager Ananlytics @ Jodo](https://www.linkedin.com/in/md-asif-aftab)
+> [Md Asif Aftab, Manager Analytics @ Jodo](https://www.linkedin.com/in/md-asif-aftab)

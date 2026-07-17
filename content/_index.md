@@ -7,6 +7,6 @@ I’m a backend-focused Staff Software Engineer with 7+ years of experience buil
 
 Built integration platform processing ₹100Cr+ daily transaction volume across 400+ partner systems, supporting ~60K invoice workflows per day.
 
-[View Recommendations from my team](/resume/recommendations/)
+[View Recommendations from my team](/recommendations)
 
 ---

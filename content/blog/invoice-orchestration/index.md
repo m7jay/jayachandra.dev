@@ -142,50 +142,54 @@ The 2pm–6pm window is fixed, so worker count is a direct function of per-invoi
 
 **Assumptions:**
 
-- Processing window: 4 hours
-- On avg per-invoice processing time: ~5s
-- ~5% of invoices hit the 15s worst case
+- Processing window: 4 hours (14,400s)
+- ~5% of due invoices are skipped before any partner call — subscription no longer valid, amount below the minimum, mandate not yet active. These cost milliseconds, so they count as ~0 worker-seconds.
+- Of the invoices that do need a partner call, ~5% hit the 15s worst case; the rest average ~5s.
 
-**Total processing time required, for 50,000 invoices:**
-
-$$
-\text{Slow invoices} = 5\\% \times 50{,}000 = 2{,}500 \text{ invoices} \times 15\text{s} = 37{,}500 \text{ worker-seconds}
-$$
+**Total processing time required, for 50,000 due invoices:**
 
 $$
-\text{Average invoices} = 95\\% \times 50{,}000 = 47{,}500 \text{ invoices} \times 5\text{s} = 237{,}500 \text{ worker-seconds}
+\text{Skipped} = 5\% \times 50{,}000 = 2{,}500 \text{ invoices} \approx 0 \text{ worker-seconds}
 $$
 
 $$
-\text{Total work} = 37{,}500 + 237{,}500 = 275{,}000 \text{ worker-seconds}
+\text{Slow invoices} = 5\% \times 50{,}000 = 2{,}500 \text{ invoices} \times 15\text{s} = 37{,}500 \text{ worker-seconds}
 $$
 
-**Workers required within the 4-hour (14,400s) window:**
-
 $$
-\text{Workers required} = \frac{275{,}000}{14{,}400} \approx 19.1 \Rightarrow \textbf{20 workers}
+\text{Average invoices} = 45{,}000 \times 5\text{s} = 225{,}000 \text{ worker-seconds}
 $$
 
-So roughly 20 concurrent workers are needed to clear a 50k-invoice day within the 4-hour window.
+$$
+\text{Total work} = 37{,}500 + 225{,}000 = 262{,}500 \text{ worker-seconds}
+$$
 
-| Daily invoice volume | Workers needed (at 2,900 msgs/worker) |
-| -------------------- | ------------------------------------- |
-| 1,000                | 1                                     |
-| 10,000               | 4                                     |
-| 25,000               | 9                                     |
-| 50,000               | 18                                    |
-| 60,000               | 21                                    |
+**Workers required within the 4-hour window:**
+
+$$
+\text{Workers required} = \frac{262{,}500}{14{,}400} \approx 18.2 \Rightarrow \textbf{19 workers}
+$$
+
+That matches what we ran: about 20 workers on a 50K day, sitting a worker or two above the floor.
+
+| Daily invoice volume | Minimum workers (mean 5.5s, 5% skipped) |
+| -------------------- | --------------------------------------- |
+| 1,000                | 1                                       |
+| 10,000               | 4                                       |
+| 25,000               | 10                                      |
+| 50,000               | 19                                      |
+| 60,000               | 22                                      |
 
 **Sensitivity to the slow-invoice share:**
 
 | Share of invoices at 15s | Workers required |
 | ------------------------ | ---------------- |
-| 0% (all at 5s)           | 18               |
-| 5%                       | 20               |
-| 10%                      | 21               |
-| 20%                      | 25               |
+| 0% (all at 5s)           | 17               |
+| 5%                       | 19               |
+| 10%                      | 20               |
+| 20%                      | 24               |
 
-**Caveat:** this model assumes work is evenly distributed across workers — any worker can pick up any invoice, with no clustering of slow invoices onto specific workers. In practice, provisioning a small buffer above the minimum (15-20%) is a reasonable hedge against queueing delay and uneven distribution near the window's deadline.
+**Caveat:** this model assumes work is evenly distributed across workers — any worker can pick up any invoice, with no clustering of slow invoices onto specific workers. That assumption carries the most risk here: a single degraded partner pins its 15s calls to one partition and serialises behind them. At the 19-worker floor the window is ~96% utilised, and queueing delay rises non-linearly as utilisation approaches 1, so a partner that goes slow in the last hour has no slack to absorb. On predicted heavy days we provision a few workers above the floor for exactly that reason.
 
 ---
 

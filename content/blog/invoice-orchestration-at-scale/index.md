@@ -1,7 +1,7 @@
 ---
 title: "Scaling the Invoice Pipeline 20x"
-date: 2026-07-12
-summary: "What changes in the invoice pull-and-present design at 100K and 1M invoices a day — concurrency, partitions, async workers, partner rate limits, and the notification bill."
+date: 2026-10-23
+summary: "What changes in the invoice pull-and-present design at 100K and 1M invoices a day — architecture options from scheduled Spot to serverless and managed orchestration, plus the partner rate limit and notification bill."
 tags: ["case-study", "distributed-systems", "payments", "reliability", "scaling"]
 showTableOfContents: true
 layout: "simple"
@@ -10,7 +10,7 @@ layout: "simple"
 > **TL;DR:**
 > The as-built design clears 50K–60K invoices a day in a four-hour window. At 100K, partitions and thread-per-invoice workers stop being enough. At 1M the partner rate limit and the SMS bill bind before capacity does.
 
-This is the design-notes companion to [Invoice Presentation Orchestration](/blog/invoice-orchestration/). That post describes what runs today; this one asks what would have to change at 100K and 1M — and what would stay exactly as it is.
+This is the design-notes companion to [Invoice Presentation Orchestration](/blog/invoice-orchestration/). That post describes what runs today; this one asks what would have to change at 100K and 1M — which architecture shape to run it on, which component breaks first, and what would stay exactly as it is.
 
 The current shape was sized for 50-60K and works because three things were true: 20 partitions were enough consumer parallelism, one worker thread could hold one in-flight invoice, and every partner would accept our request rate inside a common 4-hour window. At 100K the first two bend and the third still holds. At 1M all three break, and capacity stops being the interesting constraint.
 
@@ -24,6 +24,52 @@ Running the same model forward:
 | Concurrency required in 4h | 18.2 → 19 | 36.5 → 37 | 364.6 → 365 |
 | Sustained message rate | 3.5/s | 6.9/s | 69.4/s |
 | Partitions at one in-flight per partition | 20 (current) | 37 | 365 |
+
+## Architecture options: five shapes for the same flow
+
+Sizing tells you how much concurrency is needed. It does not tell you what to run it on, and at these volumes the platform choice moves the bill by more than an order of magnitude. Five shapes, all of which execute the same seven steps:
+
+| Shape | Unit of work | Concurrency control | Modelled cost at 1M/day | What you give up |
+| --- | --- | --- | --- | --- |
+| As built: threaded workers on EC2, 24/7 | one thread per invoice | partitions x threads per host | ~$12,900/mo (365 threads ≈ 92 `m6i.xlarge`) | ~95% of the fleet idles; CPU is never the signal |
+| Async workers on scheduled Spot | one task, 20-25 calls in flight | task count + per-partner semaphores | ~$60-150/mo | you own the scheduler and the drain-before-deadline logic |
+| Serverless: scheduler → SQS → Lambda | one invocation per invoice | Lambda reserved/provisioned concurrency | ~$1,380/mo at 512MB, ~$690/mo at 256MB | per-partner bulkheads need external state; no connection reuse |
+| Batch array job on Spot | one item in an array job | array size + `maxvCpus` | ~$180/mo | batch semantics, not streaming; results land in S3/DB, not a queue |
+| Step Functions Distributed Map | one child execution per invoice | `MaxConcurrency` on the Map | ~$4,500-6,000/mo in state transitions alone | Standard workflows bill per transition, which dominates compute |
+
+Every figure is modelled, not billed, on the footnote's assumptions; none of them is a quote.
+
+### Serverless is a real option at 100K and a worse one at 1M
+
+At 100K, Lambda costs about **$138/month** against roughly $60 for a five-hour Spot fleet. That gap is small enough to be a rounding error next to the value of not owning a fleet: EventBridge Scheduler replaces the cron and the trigger, SQS replaces Kafka and gives you redelivery, a DLQ and partial-batch failure reporting for about $12/month, and the queue's own metrics become the lag signal. If the system were being built today for 50-100K, this is the shape I would start with.
+
+At 1M the arithmetic turns. Lambda bills per GB-second of wall time, and an invoice spends 5.5s of that waiting on a partner, so the same idle wait the as-built fleet pays for in containers comes back as $1,380/month at 512MB - roughly ten to twenty times the async Spot fleet. *Why the fleet wins:* with a fixed four-hour window you are buying time, not requests, and reserved capacity prices time far below per-invocation billing.
+
+Three Lambda constraints matter more than the price:
+
+- **The 15-minute ceiling applies to the sweep, not the invoice.** One invocation cannot stream a million due invoices to a queue; shard the sweep by partner cohort and accept N scheduled invocations, each with its own `request_id` shard.
+- **Concurrency control is per function, not per partner.** A bulkhead in Lambda needs external state - a token bucket in DynamoDB, or one queue per partner with reserved concurrency - because there is no long-lived process to hold a per-partner semaphore.
+- **No connection reuse.** Each invocation opens fresh TLS to the partner endpoint, adding a handshake to a 5.5s job and multiplying connections the partner sees at peak. At 365 concurrent that is the partner's problem to notice.
+
+### The sweep is a batch job, and Batch says so
+
+Strip the streaming vocabulary and this workload is: a manifest of a million invoices, a fixed four-hour deadline, a per-item retry policy, and a result set for a report. That is an array job. AWS Batch expresses it directly - array size, `maxvCpus` as the concurrency cap, per-item retry attempts, and Spot interruption handling that requeues the item - for compute cost and no per-state charge. The outbox key and idempotent present make the requeue safe, which is the only reason a Spot array is viable at all.
+
+The same argument applies to Step Functions Distributed Map, with one caveat: it is the better tool when the per-item flow has branches worth seeing (skip, park, retry, escalate), and the worse tool on price, because Standard workflows bill per state transition. At six to eight transitions an invoice, a million invoices a day is $4,500-6,000/month before any compute. Express workflows and Batch both avoid that, which is why the orchestration layer should not be the default choice at this volume.
+
+### Which one wins, and why
+
+The verdict differs by rung, and the reasoning is the same in all three cases: pick the shape that matches how the work *arrives*, then check the price.
+
+- **At 50-60K: none of them. Keep what runs today.** The fleet costs a few hundred dollars a month, the retry contract already works, and every option here re-platforms it for a saving measured in tens of dollars.
+- **At 100K, from a clean sheet: serverless.** Arrival is unknown ahead of the day, volume swings 60x, and 37 invoices in flight fit inside one function's concurrency without anyone tuning a fleet. $138/month against ~$60 is not a real difference, and the queue, the retry policy, the DLQ and the lag metrics all come with it. From the existing system: keep it and move to async workers on Spot, because the same $80 does not justify re-writing ingestion and redelivery.
+- **At 1M: scheduled capacity, not serverless.** A Batch array on Spot (or async workers on Spot) at roughly $180/month, with the orchestration layer left out. *Why:* the load is a fixed four-hour peak with a known deadline, which is precisely what reserved throughput prices well and what per-invocation billing prices badly; the partner rate limit, not our elasticity, is what binds; and Standard state-transition billing costs several times the compute it orchestrates.
+
+The crossover is arithmetic rather than taste. A Lambdafied invoice costs about **$0.000046** (512MB, 5.5s, one request), so against a five-hour Spot fleet at ~$100/month the two are equal at roughly **72,000 invoices a day** - below it serverless is cheaper *and* simpler, above it the fleet pulls away and keeps going. Two caveats decide the edge cases: per-partner concurrency caps need external state under Lambda, and the 15-minute invocation ceiling means the 2pm sweep itself has to be sharded once a single job can no longer finish the enumeration.
+
+### What every shape has to preserve
+
+None of these options changes the part that makes retries safe: the outbox key `(request_id, sequence_number)`, present returning success for a duplicate, the amount written as a set-to-value rather than a delta, and per-partner configuration behind the template method. Those four decisions are portable across EC2, Fargate, Lambda, Batch and any orchestrator - which is the test of whether they were design decisions or accidents of the platform.
 
 ## Ingestion: shard the sweep, stream the rows
 

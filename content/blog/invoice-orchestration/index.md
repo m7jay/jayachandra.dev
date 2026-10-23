@@ -143,6 +143,8 @@ Two reports run on this data: an internal one at 6pm, which partner POCs use to 
 
 - Re-presenting is safe by contract: if an invoice reaches the present call twice, the core service returns success with an "already presented" message rather than an error, so a retry after a partial failure is a no-op rather than a failure the worker has to interpret.
 
+- The internal update in step 4 is a set, not a delta. The worker writes the amount and due date it computed from the partner's response, so a retry that gets past the row key rewrites the same values rather than adding to them - the key stops duplicate rows, and set-to-value semantics stop a duplicate value.
+
 - Duplicate customer notification is handled by notification service.
 
 - Deployments need to be managed to avoid disruption during this workflow.
@@ -263,4 +265,4 @@ Three numbers carry the argument, run through the same 5.5s-mean model used abov
 - **The work is I/O, not compute** — roughly 1M invoices at ~30ms of CPU each is about 2 vCPU sustained across the whole window. A thread-per-invoice fleet needs ~365 containers and pays around twenty times over for idle time; async workers holding 20-25 calls each cover the window with 2-3 tasks at 100K and 8-15 at 1M.
 - **The partner rate limit binds before our capacity does** — 10% of a 1M day needs 6.9 req/s to finish in four hours, or 13.9 hours at a 2 req/s cap. The single global window has to become per-partner scheduling plus deadline-aware admission.
 
-The full component-by-component design, the sizing tables and the modelled cost comparison are written up separately: **[Scaling the invoice pipeline 20x →](/blog/invoice-orchestration-at-scale/)**.
+The component-by-component design, a comparison of the architecture shapes it could run on - scheduled Spot, serverless, Batch, Step Functions - with modelled costs and a recommendation per volume rung, is written up separately: **[Scaling the invoice pipeline 20x →](/blog/invoice-orchestration-at-scale/)**.

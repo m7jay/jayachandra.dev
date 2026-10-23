@@ -219,3 +219,30 @@ Two failure modes are handled operationally rather than automatically:
 - **Final state reached but not presented** - the invoice was validated and updated, but the present-for-debit step didn't complete due to a validation failure. These are also handled operationally rather than auto-retried.
 
 Full automated recovery for every edge case at this volume wasn't worth the complexity, given how rarely these states occur in practice. Operational visibility makes manual intervention fast enough that it wasn't worth automating - so far.
+
+---
+
+## What we'd change if we built this today
+
+None of the below is a defect in the running system - it clears 50-60K a day inside the window. These are the things we consciously deferred, plus the ones we understand better now than we did at design time.
+
+**Isolation and failure containment**
+
+- *Per-partner partitions and bulkheads.* Today any worker can pick up any invoice, so a degraded partner consumes shared capacity and its 15s calls serialise wherever the partition assigns them. Partitioning by partner key would let us scale a slow integration independently and cap its blast radius at its own share of the pool.
+- *Circuit breaking with deadline awareness.* Retries are per-partner and unaware of window state. Three retries against a partner returning timeouts turns one 5.5s invoice into ~50 worker-seconds, and the window closes whether or not the work finished. We would trip a breaker on error rate and move that cohort to the reprocessing queue instead of spending window time on it.
+- *Per-partner request budgets.* Some of the 15s tail is probably us exceeding a partner's rate limit rather than inherent latency. A request budget that honours `Retry-After` would remove tail latency we currently model as a given.
+
+**Correctness**
+
+- *Close the re-check/present gap properly.* The second validity check is advisory - state can change between it and the present call. The fix is compare-and-set on a version inside the core service's transaction, with a duplicate returning a conflict the worker treats as "already done" rather than a retryable failure.
+- *One idempotency key across present and notification enqueue.* If present succeeds and the enqueue fails, the retry re-presents; today the notification service absorbs the duplicate. Sharing a key would let the retry resume instead of re-execute.
+- *Pre-check the mandate ceiling during the diff.* "Required amount exceeds the registered mandate maximum" is deterministic - retrying cannot fix it - and it arrives in cohorts, because every customer on the affected plan trips it at once. Checking it in step 3 routes those to re-registration as a distinct terminal state instead of the manual queue.
+
+**Operability**
+
+- *A projection alert, not just dashboards.* The alert that matters fires at 3pm: "at current drain rate the queue finishes at 19:40 - window at risk." Grafana tells us what happened; that tells us early enough to act.
+- *A DLQ and a re-drive tool.* Retries are configurable per partner, but the exhaustion path is implicit. A named destination plus a re-drive command would turn reprocessing into a button instead of a runbook step.
+- *Scheduled scaling on lag.* The workers run 24/7 and we use them for four hours. Large bulk counts are spread across the month, so capacity is usually fine; the manual provisioning happens on the rare day when several partners' bulk days coincide. Cron-triggered scaling on consumer lag would cover those days without depending on someone remembering.
+- *Deploy freeze enforced by CI, not discipline.* A rolling restart mid-window rebalances the consumer group and redelivers in-flight messages - removing capacity exactly when the window is tightest. That belongs in pipeline rules.
+- *Automated invariants.* `ingested == presented + skipped + failed + parked`, checked at window close. Ops should read Redash to answer questions, not to discover discrepancies.
+- *Parked-with-reason metrics.* Handing an invoice to a POC when the configured behaviour does not cover the case is deliberate - a wrong debit costs the customer far more than a failed run - but the *signal* could be better. Counting parked invoices by reason would turn config gaps into a visible backlog instead of a daily surprise during the window.

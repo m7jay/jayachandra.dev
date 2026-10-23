@@ -69,7 +69,7 @@ F --> G[Slack alert: ingestion count]
 end
 {{< /mermaid >}}
 
-A 2pm cron triggers a Lambda, which hits the core auto-debit service. The core service kicks off an async task (Celery) that fetches all invoices due, writes them to a table using the **transactional outbox pattern**, and enqueues them to Kafka in batches sized to the day's volume. A Slack alert confirms the trigger fired and reports the invoice count for the day - this gives an early signal if the current day's volume looks abnormal before any processing starts. We can also have an alert to get the due invoice counts for next few days, so that we can plan for any infra changes needed.
+A 2pm cron triggers a Lambda, which hits the core auto-debit service. The core service kicks off an async task (Celery) that fetches all invoices due, writes them to the `PullInvoiceHistory` table using the **transactional outbox pattern**, and enqueues them to Kafka in batches sized to the day's volume. A Slack alert confirms the trigger fired and reports the invoice count for the day - this gives an early signal if the current day's volume looks abnormal before any processing starts. We can also have an alert to get the due invoice counts for next few days, so that we can plan for any infra changes needed.
 
 ### Stage 2 — Process enqueued invoices
 
@@ -137,7 +137,11 @@ Two reports run on this data: an internal one at 6pm, which partner POCs use to 
 
 - At integration service, we have a default way of processing of invoices, per partner we could have custom implementations using the template method pattern.
 
-- Duplicate invoice processing is avoided by having a composite key in the invoice outbox table before ingestion and invoice present call is idempotent and would raise error if already presented.
+- Duplicate ingestion is prevented by the key on `PullInvoiceHistory`: `request_id` (unique per enqueue job, so unique per day) plus `sequence_number` (the invoice's index in that day's list). Two rows for the same case within one run are impossible.
+
+- There is deliberately no unique constraint on `invoice_id`. An invoice that failed yesterday has to be enqueued again on a later day under a new `request_id`, and a key on the invoice would block that retry.
+
+- Re-presenting is safe by contract: if an invoice reaches the present call twice, the core service returns success with an "already presented" message rather than an error, so a retry after a partial failure is a no-op rather than a failure the worker has to interpret.
 
 - Duplicate customer notification is handled by notification service.
 
@@ -235,7 +239,7 @@ None of the below is a defect in the running system - it clears 50-60K a day ins
 **Correctness**
 
 - *Close the re-check/present gap properly.* The second validity check is advisory - state can change between it and the present call. The fix is compare-and-set on a version inside the core service's transaction, with a duplicate returning a conflict the worker treats as "already done" rather than a retryable failure.
-- *One idempotency key across present and notification enqueue.* If present succeeds and the enqueue fails, the retry re-presents; today the notification service absorbs the duplicate. Sharing a key would let the retry resume instead of re-execute.
+- *One idempotency key across present and notification enqueue.* Present is already idempotent by contract, so a retry up to that point is harmless; the notification enqueue is the remaining step that leans on the notification service's own dedupe. Carrying the same key across both would let a retry resume rather than re-execute.
 - *Pre-check the mandate ceiling during the diff.* "Required amount exceeds the registered mandate maximum" is deterministic - retrying cannot fix it - and it arrives in cohorts, because every customer on the affected plan trips it at once. Checking it in step 3 routes those to re-registration as a distinct terminal state instead of the manual queue.
 
 **Operability**

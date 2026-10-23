@@ -18,20 +18,20 @@ That amount is not guaranteed to stay correct until the actual debit date, becau
 - a cash payment done reduces the balance amount to be collected
 - a previously applied discount gets reverted, increasing the amount due
 - a new discount gets applied, decreases the due amount
-- the due date itself gets moved to future date
+- the due date itself gets moved to a future date
 
 Debiting a stale amount has real financial consequences. A wrong debit can result in a bounce and carry penalty charges for the end customer. So the amount presented for debit has to reflect the partner's current state, not the state at mandate-setup time.
 
 **Why integrations, not just manual updates?**
 
-The alternative, partners bulk-uploads dues once a day, creates a single point of failure and forces the partner's system into a freeze window until the upload is processed.
+The alternative, partners bulk-upload dues once a day, creates a single point of failure and forces the partner's system into a freeze window until the upload is processed.
 That doesn't scale across partners with different operational rhythms, and it puts an availability constraint on someone else's system, which we don't control.
 
 Instead, we fetch the latest details directly from each partner system, reconcile the delta against what's currently recorded, and adjust before presenting the invoice for debit.
 
 **Why the 4 hour window specifically?**
 
-- All due invoices needs to be processed in a window of approx 4 hours.
+- All due invoices need to be processed in a window of approx 4 hours.
 - Many partners run their own updates (cash collection entries, discount changes) in the first half of the day. Fetching earlier risks pulling pre-update, stale data.
 - Once an invoice is presented, we owe the customer a debit intimation notice. We don't want that notice going out late in the evening.
 
@@ -68,7 +68,7 @@ F --> G[Slack alert: ingestion count]
 end
 {{< /mermaid >}}
 
-A 2pm cron triggers a Lambda, which hits the core auto-debit service. The core service kicks off an async task (Celery) that fetches all invoices due, writes them to a table using the **transactional outbox pattern**, and enqueues them to Kafka in batches sized to the day's volume. A Slack alert confirms the trigger fired and reports the invoice count for the day - this gives an early signal if current days volume looks abnormal before any processing starts. We can also have a alert to get the due invoice counts for next few days, so that we can plan for any infra changes needed.
+A 2pm cron triggers a Lambda, which hits the core auto-debit service. The core service kicks off an async task (Celery) that fetches all invoices due, writes them to a table using the **transactional outbox pattern**, and enqueues them to Kafka in batches sized to the day's volume. A Slack alert confirms the trigger fired and reports the invoice count for the day - this gives an early signal if the current day's volume looks abnormal before any processing starts. We can also have an alert to get the due invoice counts for next few days, so that we can plan for any infra changes needed.
 
 ### Stage 2 — Process enqueued invoices
 
@@ -118,21 +118,21 @@ A 10pm cron triggers report generation, reading from the same outbox table popul
 
 - Integration Service acts like an orchestrator, handling fetching data from external partner systems, figuring out if an update is needed, changes to be done and making HTTP requests to internal services to update the new state and finally presenting the invoice for debit.
 
-- Integrations workers are running 24/7, even though we only use them for few hours every day. We didn't need to do worker auto scaling, when needed for few days a year, we could monitor and increase the resource on specific days as per the load.
+- Integrations workers are running 24/7, even though we only use them for a few hours every day. We didn't need to do worker auto scaling, when needed for a few days a year, we could monitor and increase the resource on specific days as per the load.
 
-- Each msg can take upto ~5s to be processed successfully and multiple calls over HTTP are done (external and internal calls) in processing a single msg.
+- Each message can take up to ~5s to be processed successfully and multiple calls over HTTP are done (external and internal calls) in processing a single message.
 
 - For each partner, we have configurable timeouts in integration service.
 
 - For each partner we have configurable number of retries in case of failures while processing the invoice.
 
-- At integration service, we have a default way of processing of invoices, per partners we could have custom implementations using the template method pattern.
+- At integration service, we have a default way of processing of invoices, per partner we could have custom implementations using the template method pattern.
 
 - Duplicate invoice processing is avoided by having a composite key in the invoice outbox table before ingestion and invoice present call is idempotent and would raise error if already presented.
 
 - Duplicate customer notification is handled by notification service.
 
-- Deployments needs to be managed to avoid disruption during this workflow.
+- Deployments need to be managed to avoid disruption during this workflow.
 
 ## Capacity planning: how many workers do we need?
 
@@ -195,7 +195,7 @@ That matches what we ran: about 20 workers on a 50K day, sitting a worker or two
 
 ## Observability
 
-- Grafana dashboards to monitor the service healths / resource consumption.
+- Grafana dashboards to monitor service health / resource consumption.
   - For integration service, external partner call latency, MSK health
 
 - Redash dashboards to query the outbox table to check for invoice state and counts.
@@ -209,4 +209,4 @@ Two failure modes are handled operationally rather than automatically:
 - **Messages stuck in an intermediate state** - an invoice that started processing but didn't reach a terminal state before the window closed. These require manual reprocessing.
 - **Final state reached but not presented** - the invoice was validated and updated, but the present-for-debit step didn't complete due to a validation failure. These are also handled operationally rather than auto-retried.
 
-Full automated recovery for every edge case at this volume wasn't worth the complexity, given how rarely these states occur in practice. Operational visibility makes manual intervention fast enough that it wasn't needed to be automated - so far.
+Full automated recovery for every edge case at this volume wasn't worth the complexity, given how rarely these states occur in practice. Operational visibility makes manual intervention fast enough that it wasn't worth automating - so far.

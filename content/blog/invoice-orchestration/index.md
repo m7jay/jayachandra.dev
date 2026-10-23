@@ -40,6 +40,7 @@ Instead, we fetch the latest details directly from each partner system, reconcil
 ## Scale and shape of the problem
 
 - **Volume is spiky, not steady.** Daily invoice counts range from ~1,000 to ~60,000, depending on the day of month and partner systems.
+- **Bulk counts land on different days per partner.** Most partners settle their large volume on their own day of the month, so the 1,000-60,000 swing is largely a function of whose bulk day it is. The rare day when several partners' bulk days coincide is when we provision extra capacity by hand.
 - **Partner heterogeneity.** Each partner runs its own tech stack, with its own release cycles, a partner-side fix or change can take weeks to months to ship. Partner team competence varies widely - some are well-staffed engineering teams, others have outsourced, slow-to-respond vendors.
 - **Latency variance per partner is extreme** — anywhere from a few milliseconds to 15 seconds per request, and this is _unpredictable_ in advance.
 - **Shared infrastructure contention.** This pipeline doesn't run in isolation. At the same time, the same core services are handling inbound webhooks from partners, outbound webhook dispatch to partners, high-volume push API traffic, and internal bulk uploads/report downloads. A spike in any of these can degrade the pull-and-present flow's throughput, and vice versa.
@@ -97,6 +98,8 @@ Integration service workers consume from Kafka and process invoices one at a tim
 6. Present the invoice for debit.
 7. Enqueue a customer notification about the upcoming debit.
 
+**Scope:** this workflow ends at presentation. Everything after it - whether the debit succeeded, whether it returned, and what happens next - belongs to the core subscription service, not the integration service.
+
 ### Stage 3 — Generate reports
 
 {{< mermaid >}}
@@ -112,6 +115,8 @@ end
 
 A 10pm cron triggers report generation, reading from the same outbox table populated in Stage 1 - so the report reflects exactly what was ingested and processed, not a live re-query that could double-count or miss records.
 
+Two reports run on this data: an internal one at 6pm, which partner POCs use to see which cases need manual attention, and the partner-facing one at 10pm. Retries update the same outbox row in place, so a case that fails at 6pm and succeeds by 9pm shows as a success in the 10pm report - the 6pm report is a work queue, not a verdict.
+
 ---
 
 ## Integration Service
@@ -123,6 +128,10 @@ A 10pm cron triggers report generation, reading from the same outbox table popul
 - Each message can take up to ~5s to be processed successfully and multiple calls over HTTP are done (external and internal calls) in processing a single message.
 
 - For each partner, we have configurable timeouts in integration service.
+
+- Partner auth differs by integration: some systems want a username and password, others a secret or API key in a header. Whatever the partner specifies is carried as per-partner config in the integration service.
+
+- Partner systems whitelist our egress IPs, and the responses we fetch are installment and due-amount records without customer-linked identifiers - so PII stays in the partner system and the core service rather than passing through the integration layer.
 
 - For each partner we have configurable number of retries in case of failures while processing the invoice.
 

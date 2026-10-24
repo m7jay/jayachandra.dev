@@ -9,7 +9,7 @@ draft: true
 ---
 
 > **TL;DR:**
-> The production design in [the current webhook platform write-up](/posts/webhooks-platform/) held roughly 100K events a day with six always-on workers. Ten times that volume, with spikes that arrive without warning, is not the same system at a larger size — it is a different shape.
+> The production design in [the current webhook platform write-up](/blog/webhooks-platform/) held roughly 100K events a day with six always-on workers. Ten times that volume, with spikes that arrive without warning, is not the same system at a larger size — it is a different shape.
 > The ideal design moves durability to the source with a transactional outbox, fans out with serverless functions instead of a fixed worker pool, and isolates every partner behind its own throttled queue with its own dead-letter queue.
 
 This is a thought experiment grounded in the real constraints of the system we built, not a proposal for what we ran. The point is the design, and where the current design deliberately stops being the right answer.

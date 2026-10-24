@@ -244,7 +244,7 @@ Nothing in that chain was observable from a dashboard, and no alert fired, becau
 
 Everything above is the design for the scale we actually served — ~100K events a day, six always-on workers. Ten times that volume, with spikes that arrive without warning, is not the same system larger; it is a different shape. The short version: move durability to the source with a transactional outbox so events can't vanish, fan out and deliver with serverless functions instead of a fixed pool so we pay for the work and not the idle, and isolate every partner behind its own throttled queue with its own dead-letter queue so a noisy neighbor can only degrade itself.
 
-The full design — the stages, the serverless trade-offs, and what 10x still can't give you — is in the companion article: **[Scaling webhooks 10x: an ideal design](/posts/webhooks-platform-10x/)**.
+The full design — the stages, the serverless trade-offs, and what 10x still can't give you — is in the companion article: **[Scaling webhooks 10x: an ideal design](/blog/webhooks-platform-10x/)**.
 
 ## How it was observed
 

@@ -5,7 +5,6 @@ summary: "The current webhook design holds ~100K events a day with six workers. 
 tags: ["event-driven", "webhooks", "serverless", "platform-engineering", "scalability"]
 showTableOfContents: true
 layout: "simple"
-draft: true
 ---
 
 > **TL;DR:**

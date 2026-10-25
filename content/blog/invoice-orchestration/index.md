@@ -1,14 +1,14 @@
 ---
 title: "Invoice Presentation Orchestration"
 date: 2026-07-12
-summary: "How an asynchronous, stateful workflow supported 50K–60K invoices per day across roughly 400 partner systems."
+summary: "How an asynchronous, stateful workflow supported 50K-60K invoices per day across roughly 400 partner systems."
 tags: ["case-study", "distributed-systems", "payments", "reliability"]
 showTableOfContents: true
 layout: "simple"
 ---
 
 > **TL;DR:**
-> How an asynchronous, stateful workflow supported 50K–60K invoice processing per day across roughly 400 partner systems.
+> How an asynchronous, stateful workflow supported 50K-60K invoice processing per day across roughly 400 partner systems.
 
 ## The problem
 
@@ -42,7 +42,7 @@ Instead, we fetch the latest details directly from each partner system, reconcil
 - **Volume is spiky, not steady.** Daily invoice counts range from ~1,000 to ~60,000, depending on the day of month and partner systems.
 - **Bulk counts land on different days per partner.** Most partners settle their large volume on their own day of the month, so the 1,000-60,000 swing is largely a function of whose bulk day it is. The rare day when several partners' bulk days coincide is when we provision extra capacity by hand.
 - **Partner heterogeneity.** Each partner runs its own tech stack, with its own release cycles, a partner-side fix or change can take weeks to months to ship. Partner team competence varies widely - some are well-staffed engineering teams, others have outsourced, slow-to-respond vendors.
-- **Latency variance per partner is extreme** — anywhere from a few milliseconds to 15 seconds per request, and this is _unpredictable_ in advance.
+- **Latency variance per partner is extreme** - anywhere from a few milliseconds to 15 seconds per request, and this is _unpredictable_ in advance.
 - **Shared infrastructure contention.** This pipeline doesn't run in isolation. At the same time, the same core services are handling inbound webhooks from partners, outbound webhook dispatch to partners, high-volume push API traffic, and internal bulk uploads/report downloads. A spike in any of these can degrade the pull-and-present flow's throughput, and vice versa.
 - **No safe prefetch/cache.** We can't fetch once and cache for the day - that reintroduces the staleness problem we're solving for. Every invoice needs a fresh fetch within the window.
 - **Dual reporting requirement.** After processing, two different reports are generated: an internal report for ops/follow-up, and an external report for subscribed clients.
@@ -55,7 +55,7 @@ The core tension: a hard 4-hour window, partner latency we don't control, volume
 
 ![Pull and Present - Invoice Processing Architecture](pull_and_present_invoice_processing_architecture.png)
 
-### Stage 1 — Enqueue due invoices
+### Stage 1 - Enqueue due invoices
 
 {{< mermaid >}}
 flowchart TD
@@ -71,7 +71,7 @@ end
 
 A 2pm cron triggers a Lambda, which hits the core auto-debit service. The core service kicks off an async task (Celery) that fetches all invoices due, writes them to the `PullInvoiceHistory` table using the **transactional outbox pattern**, and enqueues them to Kafka in batches sized to the day's volume. A Slack alert confirms the trigger fired and reports the invoice count for the day - this gives an early signal if the current day's volume looks abnormal before any processing starts. We can also have an alert to get the due invoice counts for next few days, so that we can plan for any infra changes needed.
 
-### Stage 2 — Process enqueued invoices
+### Stage 2 - Process enqueued invoices
 
 {{< mermaid >}}
 flowchart TD
@@ -100,7 +100,7 @@ Integration service workers consume from Kafka and process invoices one at a tim
 
 **Scope:** this workflow ends at presentation. Everything after it - whether the debit succeeded, whether it returned, and what happens next - belongs to the core subscription service, not the integration service.
 
-### Stage 3 — Generate reports
+### Stage 3 - Generate reports
 
 {{< mermaid >}}
 flowchart TD
@@ -153,12 +153,12 @@ Two reports run on this data: an internal one at 6pm, which partner POCs use to 
 
 {{< katex >}}
 
-The 2pm–6pm window is fixed, so worker count is a direct function of per-invoice processing time and total volume for the day.
+The 2pm-6pm window is fixed, so worker count is a direct function of per-invoice processing time and total volume for the day.
 
 **Assumptions:**
 
 - Processing window: 4 hours (14,400s)
-- ~5% of due invoices are skipped before any partner call — subscription no longer valid, amount below the minimum, mandate not yet active. These cost milliseconds, so they count as ~0 worker-seconds.
+- ~5% of due invoices are skipped before any partner call - subscription no longer valid, amount below the minimum, mandate not yet active. These cost milliseconds, so they count as ~0 worker-seconds.
 - Of the invoices that do need a partner call, ~5% hit the 15s worst case; the rest average ~5s.
 
 **Total processing time required, for 50,000 due invoices:**
@@ -204,7 +204,7 @@ That matches what we ran: about 20 workers on a 50K day, sitting a worker or two
 | 10%                      | 20               |
 | 20%                      | 24               |
 
-**Caveat:** this model assumes work is evenly distributed across workers — any worker can pick up any invoice, with no clustering of slow invoices onto specific workers. That assumption carries the most risk here: a single degraded partner pins its 15s calls to one partition and serialises behind them. At the 19-worker floor the window is ~96% utilised, and queueing delay rises non-linearly as utilisation approaches 1, so a partner that goes slow in the last hour has no slack to absorb. On predicted heavy days we provision a few workers above the floor for exactly that reason.
+**Caveat:** this model assumes work is evenly distributed across workers - any worker can pick up any invoice, with no clustering of slow invoices onto specific workers. That assumption carries the most risk here: a single degraded partner pins its 15s calls to one partition and serialises behind them. At the 19-worker floor the window is ~96% utilised, and queueing delay rises non-linearly as utilisation approaches 1, so a partner that goes slow in the last hour has no slack to absorb. On predicted heavy days we provision a few workers above the floor for exactly that reason.
 
 ---
 
@@ -261,8 +261,8 @@ The design above was sized for 50-60K a day and works because three things are t
 
 Three numbers carry the argument, run through the same 5.5s-mean model used above:
 
-- **Concurrency** — 37 invoices in flight at 100K and 365 at 1M, so the current 20 partitions stop being enough at 100K.
-- **The work is I/O, not compute** — roughly 1M invoices at ~30ms of CPU each is about 2 vCPU sustained across the whole window. A thread-per-invoice fleet needs ~365 containers and pays around twenty times over for idle time; async workers holding 20-25 calls each cover the window with 2-3 tasks at 100K and 8-15 at 1M.
-- **The partner rate limit binds before our capacity does** — 10% of a 1M day needs 6.9 req/s to finish in four hours, or 13.9 hours at a 2 req/s cap. The single global window has to become per-partner scheduling plus deadline-aware admission.
+- **Concurrency** - 37 invoices in flight at 100K and 365 at 1M, so the current 20 partitions stop being enough at 100K.
+- **The work is I/O, not compute** - roughly 1M invoices at ~30ms of CPU each is about 2 vCPU sustained across the whole window. A thread-per-invoice fleet needs ~365 containers and pays around twenty times over for idle time; async workers holding 20-25 calls each cover the window with 2-3 tasks at 100K and 8-15 at 1M.
+- **The partner rate limit binds before our capacity does** - 10% of a 1M day needs 6.9 req/s to finish in four hours, or 13.9 hours at a 2 req/s cap. The single global window has to become per-partner scheduling plus deadline-aware admission.
 
 The component-by-component design, a comparison of the architecture shapes it could run on - scheduled Spot, serverless, Batch, Step Functions - with modelled costs and a recommendation per volume rung, is written up separately: **[Scaling the invoice pipeline 20x →](/blog/invoice-orchestration-at-scale/)**.

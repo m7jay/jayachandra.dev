@@ -4,6 +4,7 @@ date: 2026-05-20
 summary: "How an event-driven webhook service delivered ~100K events a day to roughly 400 partner systems with at-least-once delivery, bounded retries, and a failure trail both sides could inspect."
 tags: ["event-driven", "webhooks", "platform-engineering", "reliability"]
 showTableOfContents: false
+layout: "simple"
 ---
 
 > **TL;DR:**

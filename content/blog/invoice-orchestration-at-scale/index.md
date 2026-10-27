@@ -1,6 +1,6 @@
 ---
 title: "Scaling the Invoice Pipeline 20x"
-date: 2026-10-23
+date: 2026-10-27
 summary: "What changes in the invoice pull-and-present design at 100K and 1M invoices a day - architecture options from scheduled Spot to serverless and managed orchestration, plus the partner rate limit and notification bill."
 tags: ["case-study", "distributed-systems", "payments", "reliability", "scaling"]
 showTableOfContents: true
